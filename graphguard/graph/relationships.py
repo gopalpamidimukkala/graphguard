@@ -1,7 +1,9 @@
-from graphguard.graph import Edge, Node, SpatialRelation
+from graphguard.graph import Edge, Node, RelationType
 from graphguard.graph.geometry import (
     center,
+    contains,
     distance,
+    inside,
     iou,
 )
 
@@ -17,9 +19,68 @@ class SpatialRelationshipEngine:
         self.near_threshold = near_threshold
 
     def build_edges(
-        self,
-        nodes: list[Node],
+    self,
+    nodes: list[Node],
     ) -> list[Edge]:
+
+        edges = []
+
+        for i, source in enumerate(nodes):
+            for j, target in enumerate(nodes):
+
+                if i >= j:
+                    continue
+
+                forward = self.relationships(source, target)
+                backward = self.relationships(target, source)
+
+                # Symmetric relationships (store once)
+                if RelationType.NEAR in forward:
+                    edges.append(
+                        Edge(
+                            source=source.id,
+                            target=target.id,
+                            relation=RelationType.NEAR,
+                        )
+                    )
+
+                if RelationType.OVERLAPS in forward:
+                    edges.append(
+                        Edge(
+                            source=source.id,
+                            target=target.id,
+                            relation=RelationType.OVERLAPS,
+                        )
+                    )
+
+                # Directional relationships
+                for relation in (
+                    RelationType.LEFT_OF,
+                    RelationType.RIGHT_OF,
+                    RelationType.ABOVE,
+                    RelationType.BELOW,
+                    RelationType.CONTAINS,
+                    RelationType.INSIDE,
+                ):
+                    if relation in forward:
+                        edges.append(
+                            Edge(
+                                source=source.id,
+                                target=target.id,
+                                relation=relation,
+                            )
+                        )
+
+                    if relation in backward:
+                        edges.append(
+                            Edge(
+                                source=target.id,
+                                target=source.id,
+                                relation=relation,
+                            )
+                        )
+
+        return edges
 
         edges = []
 
@@ -39,32 +100,40 @@ class SpatialRelationshipEngine:
                     )
 
         return edges
-
+        
     def relationships(
-        self,
-        source: Node,
-        target: Node,
-    ) -> list[str]:
+    self,
+    source: Node,
+    target: Node,
+) -> list[RelationType]:
 
         relations = []
 
         sx, sy = center(source)
         tx, ty = center(target)
 
+        # Directional relationships
         if sx < tx:
-            relations.append(SpatialRelation.LEFT_OF)
+            relations.append(RelationType.LEFT_OF)
         else:
-            relations.append(SpatialRelation.RIGHT_OF)
+            relations.append(RelationType.RIGHT_OF)
 
         if sy < ty:
-            relations.append(SpatialRelation.ABOVE)
+            relations.append(RelationType.ABOVE)
         else:
-            relations.append(SpatialRelation.BELOW)
+            relations.append(RelationType.BELOW)
 
+        # Geometric relationships
         if iou(source, target) > self.overlap_threshold:
-            relations.append(SpatialRelation.OVERLAPS)
+            relations.append(RelationType.OVERLAPS)
 
         if distance(source, target) < self.near_threshold:
-            relations.append(SpatialRelation.NEAR)
+            relations.append(RelationType.NEAR)
+
+        if contains(source, target):
+            relations.append(RelationType.CONTAINS)
+
+        if inside(source, target):
+            relations.append(RelationType.INSIDE)
 
         return relations

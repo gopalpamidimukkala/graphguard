@@ -46,3 +46,19 @@ def distance(a: Node, b: Node) -> float:
     bx, by = center(b)
 
     return sqrt((ax - bx) ** 2 + (ay - by) ** 2)
+    
+
+def contains(a: Node, b: Node) -> bool:
+    ax1, ay1, ax2, ay2 = a.bbox
+    bx1, by1, bx2, by2 = b.bbox
+
+    return (
+        bx1 >= ax1
+        and by1 >= ay1
+        and bx2 <= ax2
+        and by2 <= ay2
+    )
+
+
+def inside(a: Node, b: Node) -> bool:
+    return contains(b, a)

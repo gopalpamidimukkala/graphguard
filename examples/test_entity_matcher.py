@@ -4,6 +4,9 @@ import cv2
 
 from graphguard.detector import GroundingDINODetector
 from graphguard.graph.builder import SceneGraphBuilder
+from graphguard.parser.extractor import TripletExtractor
+from graphguard.parser.text_graph_builder import TextGraphBuilder
+from graphguard.verifier.entity_matcher import EntityMatcher
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -36,28 +39,19 @@ detections = detector.detect(
     ],
 )
 
-builder = SceneGraphBuilder()
+image_graph = SceneGraphBuilder().build(detections)
 
-graph = builder.build(detections)
-
-print("\nNodes")
-for node in graph.nodes:
-    print(node)
-
-print("\nEdges")
-for edge in graph.edges:
-    print(edge)
-
-print(f"\nTotal Nodes : {len(graph.nodes)}")
-print(f"Total Edges : {len(graph.edges)}")
-
-from graphguard.visualization import SceneGraphVisualizer
-
-visualizer = SceneGraphVisualizer()
-
-visualizer.visualize(
-    graph,
-    ROOT / "data" / "outputs" / "scene_graph.png",
+triplets = TripletExtractor().extract(
+    "A person rides a bicycle."
 )
 
-print("\nScene graph saved!")
+text_graph = TextGraphBuilder().build(triplets)
+
+matcher = EntityMatcher()
+
+mapping = matcher.match(
+    image_graph,
+    text_graph,
+)
+
+print(mapping)

@@ -1,0 +1,24 @@
+ride:
+  required:
+    - above
+    - near
+    - overlaps
+
+wear:
+  required:
+    - inside
+    - near
+
+hold:
+  required:
+    - near
+    - overlaps
+
+sit_on:
+  required:
+    - above
+    - overlaps
+
+next_to:
+  required:
+    - near

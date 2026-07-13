@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 
-from .relations import SpatialRelation
+from .relation_type import RelationType
 
 @dataclass(slots=True)
 class Edge:
     source: int
     target: int
-    relation: SpatialRelation
+    relation: RelationType
