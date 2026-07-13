@@ -1,0 +1,4 @@
+# Third-party repositories
+third_party/
+checkpoints/
+.venv
