@@ -1,0 +1,6 @@
+torch
+torchvision
+opencv-python
+numpy
+transformers==4.39.3
+supervision>=0.22.0
