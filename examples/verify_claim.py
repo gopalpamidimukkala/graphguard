@@ -45,7 +45,7 @@ service = VerifierService(
 
 result = service.verify(
     image_path=IMAGE,
-    claim="A person wears a helmet.",
+    claim="A bicycle rides a person.",
     classes=[
         "person",
         "bicycle",

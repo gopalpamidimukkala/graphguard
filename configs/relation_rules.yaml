@@ -1,4 +1,12 @@
 ride:
+  subject:
+    - person
+
+  object:
+    - bicycle
+    - motorcycle
+    - horse
+
   required:
     - above
     - near
