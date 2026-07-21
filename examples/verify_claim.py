@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from graphguard.detector import GroundingDINODetector
-from graphguard.services.verifier_service import VerifierService
+# from graphguard.detector import GroundingDINODetector
+from graphguard.bootstrap import create_verifier_service
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -26,6 +26,14 @@ RULES = (
     / "relation_rules.yaml"
 )
 
+SEMANTIC_ROLE_RULES = (
+    ROOT / "configs" / "semantic_roles.yaml"
+)
+
+ENTITY_SYNONYMS = Path(
+    "configs/entity_synonyms.yaml"
+)
+
 IMAGE = (
     ROOT
     / "data"
@@ -33,19 +41,17 @@ IMAGE = (
     / "test.jpg"
 )
 
-detector = GroundingDINODetector(
-    CONFIG,
-    CHECKPOINT,
-)
-
-service = VerifierService(
-    detector=detector,
+service = create_verifier_service(
+    detector_config=CONFIG,
+    detector_checkpoint=CHECKPOINT,
     relation_rules=RULES,
+    semantic_role_rules=SEMANTIC_ROLE_RULES,
+    entity_synonyms=ENTITY_SYNONYMS,
 )
 
 result = service.verify(
     image_path=IMAGE,
-    claim="A bicycle rides a person.",
+    claim="A man rides a cycle.",
     classes=[
         "person",
         "bicycle",
@@ -74,21 +80,57 @@ for edge_result in result.edge_results:
     source = result.text_graph.nodes[edge.source].label
     target = result.text_graph.nodes[edge.target].label
 
-    print(
-        f"{source} --{edge.relation.value}--> {target}"
+    print(f"{source} --{edge.relation.value}--> {target}")
+
+    print(f"Status : {decision.status.value}")
+    print(f"Score  : {edge_result.evidence.score:.2f}")
+
+    matched = (
+        edge_result.expected_relations
+        & edge_result.observed_relations
     )
-    print(
-        f"Status : {decision.status.value}"
+
+    missing = (
+        edge_result.expected_relations
+        - edge_result.observed_relations
     )
-    print(
-        f"Score  : {decision.evidence.score:.2f}"
+
+    extra = (
+        edge_result.observed_relations
+        - edge_result.expected_relations
     )
+
+    print("Matched Relations:")
+
+    if matched:
+        for relation in sorted(
+            matched,
+            key=lambda r: r.value,
+        ):
+            print(f"  ✓ {relation.value}")
+    else:
+        print("  (No relations matched)")
+
+    print("Missing Relations:")
+
+    if missing:
+        for relation in sorted(
+            missing,
+            key=lambda r: r.value,
+        ):
+            print(f"  ✗ {relation.value}")
+    else:
+        print("  ✓ None")
+
+    print("Additional Observed Relations:")
+
+    if extra:
+        for relation in sorted(
+            extra,
+            key=lambda r: r.value,
+        ):
+            print(f"  • {relation.value} (extra evidence)")
+    else:
+        print("  None")
+
     print()
-
-print("\nImage Graph")
-print(f"Nodes: {len(result.image_graph.nodes)}")
-print(f"Edges: {len(result.image_graph.edges)}")
-
-print("\nText Graph")
-print(f"Nodes: {len(result.text_graph.nodes)}")
-print(f"Edges: {len(result.text_graph.edges)}")

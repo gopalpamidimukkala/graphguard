@@ -1,0 +1,40 @@
+ride:
+  subjects:
+    - person
+
+  objects:
+    - bicycle
+    - motorcycle
+    - horse
+
+wear:
+  subjects:
+    - person
+
+  objects:
+    - helmet
+    - shirt
+    - backpack
+
+hold:
+  subjects:
+    - person
+
+  objects:
+    - bottle
+    - phone
+    - umbrella
+
+sit_on:
+  subjects:
+    - person
+
+  objects:
+    - chair
+    - bench
+    - bicycle
+
+next_to:
+  subjects: []
+
+  objects: []

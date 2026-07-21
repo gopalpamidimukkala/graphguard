@@ -22,6 +22,10 @@ CHECKPOINT = (
 
 RULES = ROOT / "configs" / "relation_rules.yaml"
 
+SEMANTIC_ROLE_RULES = (
+    ROOT / "configs" / "semantic_roles.yaml"
+)
+
 IMAGE = ROOT / "data" / "images" / "test.jpg"
 
 detector = GroundingDINODetector(
@@ -32,6 +36,7 @@ detector = GroundingDINODetector(
 service = VerifierService(
     detector=detector,
     relation_rules=RULES,
+    semantic_role_rules=SEMANTIC_ROLE_RULES,
 )
 
 result = service.verify(

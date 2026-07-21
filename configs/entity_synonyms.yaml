@@ -1,0 +1,26 @@
+person:
+  - human
+  - man
+  - woman
+  - people
+  - rider
+
+bicycle:
+  - bike
+  - cycle
+
+motorcycle:
+  - motorbike
+  - bike_motor
+
+helmet:
+  - hardhat
+
+car:
+  - automobile
+  - vehicle
+
+phone:
+  - cellphone
+  - mobile
+  - smartphone
